@@ -1,0 +1,9 @@
+<main class="dashboard">
+  <section class="panel">
+    <span class="eyebrow">PC2 · Base de Datos II</span>
+    <h1>Bienvenido al inventario</h1>
+    <p>Inicio de sesión correcto. Tu cuenta está autenticada con Supabase.</p>
+    <div class="identity"><span>Usuario</span><strong>{{ email() }}</strong></div>
+    <button type="button" (click)="logout()" [disabled]="closing()">{{ closing() ? 'Cerrando sesión...' : 'Cerrar sesión' }}</button>
+  </section>
+</main>
