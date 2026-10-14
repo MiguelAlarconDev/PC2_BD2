@@ -20,6 +20,10 @@ export class Dashboard implements OnInit {
   readonly error = signal('');
   readonly productos = signal<Producto[]>([]);
 
+  totalStock(): number {
+    return this.productos().reduce((total, producto) => total + producto.stock, 0);
+  }
+
   async ngOnInit(): Promise<void> {
     const { data } = await this.auth.getUser();
     this.email.set(data.user?.email ?? 'Usuario');
