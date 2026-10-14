@@ -1,9 +1,40 @@
 <main class="dashboard">
   <section class="panel">
-    <div class="eyebrow">PC2 · Base de Datos II</div>
-    <h1>Bienvenido al inventario</h1>
-    <p>Has iniciado sesión correctamente con Supabase Auth.</p>
-    <div class="user">Sesión iniciada: <strong>{{ email() }}</strong></div>
-    <button type="button" [disabled]="loading()" (click)="logout()">{{ loading() ? 'Cerrando sesión...' : 'Cerrar sesión' }}</button>
+    <header class="header">
+      <div>
+        <div class="eyebrow">PC2 · Base de Datos II</div>
+        <h1>Sistema de inventario</h1>
+        <p>Productos registrados en PostgreSQL · Supabase</p>
+      </div>
+      <div class="account">
+        <span>{{ email() }}</span>
+        <button type="button" [disabled]="loading()" (click)="logout()">Cerrar sesión</button>
+      </div>
+    </header>
+    <section class="summary">
+      <div><span>Productos</span><strong>{{ productos().length }}</strong></div>
+      <div><span>Stock total</span><strong>{{ totalStock() }}</strong></div>
+    </section>
+    <div class="table-heading">
+      <h2>Listado de productos</h2>
+      <button type="button" (click)="recargar()" [disabled]="fetching()">Actualizar</button>
+    </div>
+    @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+    @if (fetching()) {
+      <p>Cargando productos...</p>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th></tr></thead>
+          <tbody>
+            @for (p of productos(); track p.id_producto) {
+              <tr><td>{{ p.id_producto }}</td><td>{{ p.nombre }}</td><td>{{ p.categorias?.nombre ?? 'Sin categoría' }}</td><td>{{ p.precio | currency:'PEN':'symbol':'1.2-2' }}</td><td>{{ p.stock }}</td></tr>
+            } @empty {
+              <tr><td colspan="5">No hay productos visibles. Comprueba los datos y las políticas RLS.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   </section>
 </main>
