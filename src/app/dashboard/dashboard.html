@@ -4,34 +4,65 @@
       <div>
         <div class="eyebrow">PC2 · Base de Datos II</div>
         <h1>Sistema de inventario</h1>
-        <p>Productos registrados en PostgreSQL · Supabase</p>
+        <p>Productos y movimientos en PostgreSQL · Supabase</p>
       </div>
-      <div class="account">
-        <span>{{ email() }}</span>
-        <button type="button" [disabled]="loading()" (click)="logout()">Cerrar sesión</button>
-      </div>
+      <div class="account"><span>{{ email() }}</span><button type="button" [disabled]="loading()" (click)="logout()">Cerrar sesión</button></div>
     </header>
     <section class="summary">
       <div><span>Productos</span><strong>{{ productos().length }}</strong></div>
       <div><span>Stock total</span><strong>{{ totalStock() }}</strong></div>
     </section>
-    <div class="table-heading">
-      <h2>Listado de productos</h2>
-      <button type="button" (click)="recargar()" [disabled]="fetching()">Actualizar</button>
-    </div>
     @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
-    @if (fetching()) {
-      <p>Cargando productos...</p>
-    } @else {
+    @if (success()) { <p class="success" role="status">{{ success() }}</p> }
+    <div class="forms">
+      <section class="form-card">
+        <h2>Registrar producto</h2>
+        <form (ngSubmit)="crearProducto()">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" name="nombre" [(ngModel)]="nuevoNombre" required maxlength="150" placeholder="Nombre del producto" />
+          <label for="categoria">Categoría</label>
+          <select id="categoria" name="categoria" [(ngModel)]="nuevaCategoria" required>
+            <option [ngValue]="null">Seleccionar categoría</option>
+            @for (c of categorias(); track c.id_categoria) { <option [ngValue]="c.id_categoria">{{ c.nombre }}</option> }
+          </select>
+          <label for="precio">Precio (S/)</label>
+          <input id="precio" name="precio" type="number" min="0" step="0.01" [(ngModel)]="nuevoPrecio" required />
+          <label for="descripcion">Descripción</label>
+          <textarea id="descripcion" name="descripcion" [(ngModel)]="nuevaDescripcion" rows="2"></textarea>
+          <button type="submit" [disabled]="saving()">Guardar producto</button>
+        </form>
+      </section>
+      <section class="form-card">
+        <h2>Registrar entrada o salida</h2>
+        <form (ngSubmit)="registrarMovimiento()">
+          <label for="producto">Producto</label>
+          <select id="producto" name="producto" [(ngModel)]="movimientoProducto" required>
+            <option [ngValue]="null">Seleccionar producto</option>
+            @for (p of productos(); track p.id_producto) { <option [ngValue]="p.id_producto">{{ p.nombre }} (stock: {{ p.stock }})</option> }
+          </select>
+          <label for="tipo">Tipo de movimiento</label>
+          <select id="tipo" name="tipo" [(ngModel)]="movimientoTipo">
+            <option value="ENTRADA">ENTRADA (+)</option>
+            <option value="SALIDA">SALIDA (-)</option>
+          </select>
+          <label for="cantidad">Cantidad</label>
+          <input id="cantidad" name="cantidad" type="number" min="1" step="1" [(ngModel)]="movimientoCantidad" required />
+          <label for="observacion">Observación</label>
+          <textarea id="observacion" name="observacion" [(ngModel)]="movimientoObservacion" rows="2"></textarea>
+          <button type="submit" [disabled]="saving()">Registrar movimiento</button>
+        </form>
+      </section>
+    </div>
+    <div class="table-heading"><h2>Listado de productos</h2><button type="button" (click)="recargar()" [disabled]="fetching()">Actualizar</button></div>
+    @if (fetching()) { <p>Cargando productos...</p> }
+    @else {
       <div class="table-wrap">
         <table>
           <thead><tr><th>ID</th><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th></tr></thead>
           <tbody>
             @for (p of productos(); track p.id_producto) {
               <tr><td>{{ p.id_producto }}</td><td>{{ p.nombre }}</td><td>{{ p.categorias?.nombre ?? 'Sin categoría' }}</td><td>{{ p.precio | currency:'PEN':'symbol':'1.2-2' }}</td><td>{{ p.stock }}</td></tr>
-            } @empty {
-              <tr><td colspan="5">No hay productos visibles. Comprueba los datos y las políticas RLS.</td></tr>
-            }
+            } @empty { <tr><td colspan="5">No hay productos visibles. Revisa los permisos RLS.</td></tr> }
           </tbody>
         </table>
       </div>
